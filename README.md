@@ -2,7 +2,7 @@
 
 A simple Flask application that summarizes text using [Facebook’s BART-Large-CNN model](https://huggingface.co/facebook/bart-large-cnn). This project demonstrates how to integrate a pre-trained NLP model from Hugging Face into a web application for generating concise summaries of large blocks of text.
 
-![Data Summarization Screenshot](./Screenshot 2025-03-28 143828.png)
+!
 
 ## Table of Contents
 1. [Overview](#overview)  
@@ -59,7 +59,7 @@ The model can handle input text up to 1024 tokens and generates fluent, coherent
 
 ## Project structure
 
-   `
+```php
    ai_text_summarizer/
 ├── app.py                # Main Flask application
 ├── requirements.txt      # Python dependencies
@@ -69,6 +69,7 @@ The model can handle input text up to 1024 tokens and generates fluent, coherent
 ├── templates/            # HTML templates
 │   └── index.html        # Main interface
 └── README.md             # Project documentation
+
 
 
 
