@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Summarization</title>
+  <style>
+    /* Base Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background-color: #004A56;
+      color: white;
+      padding: 15px 0;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .header img {
+      max-width: 100px;
+      margin-right: 15px;
+    }
+    .header-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .content {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .input-section, .output-section {
+      flex: 1;
+      min-width: 300px;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .textarea-input, .textarea-output {
+      width: 100%;
+      min-height: 300px;
+      resize: vertical;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 15px;
+    }
+    .textarea-output {
+      background-color: #f9f9f9;
+    }
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+      margin: 5px;
+    }
+    .btn-submit {
+      background-color: #10B981;
+      color: white;
+    }
+    .btn-submit:hover {
+      background-color: #059669;
+    }
+    .btn-clear {
+      background-color: #EF4444;
+      color: white;
+    }
+    .btn-clear:hover {
+      background-color: #DC2626;
+    }
+    .btn-copy {
+      background-color: #3B82F6;
+      color: white;
+    }
+    .btn-copy:hover {
+      background-color: #2563EB;
+    }
+    .file-input {
+      display: none;
+    }
+    .file-label {
+      background-color: #3B82F6;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .file-label:hover {
+      background-color: #2563EB;
+    }
+    .file-name {
+      margin-left: 10px;
+      color: #555;
+    }
+    @media (max-width: 768px) {
+      .content {
+        flex-direction: column;
+      }
+      .input-section, .output-section {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-title">Data Summarization</div>
+  </header>
+
+  <div class="container">
+    <div class="content">
+      <div class="input-section">
+        <form id="summarizeForm" action="{{ url_for('Summarize') }}" method="post" enctype="multipart/form-data">
+          <textarea 
+            class="textarea-input" 
+            name="data" 
+            id="data" 
+            placeholder="Enter your Data">{{ request.form.get('data', '') }}</textarea>
+          
+          <div class="btn-group">
+            <input 
+              type="file" 
+              name="file" 
+              id="fileInput" 
+              class="file-input" 
+              accept=".txt,.pdf,.docx,.doc"
+            >
+            <label for="fileInput" class="file-label">
+              Upload File
+            </label>
+            <span id="fileName" class="file-name">No file chosen</span>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-submit" type="submit">Submit</button>
+            <!-- Changed type from "reset" to "button" -->
+            <button class="btn btn-clear" type="button" id="clearButton">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="output-section">
+        <textarea 
+          class="textarea-output" 
+          id="result"
+          name="result"
+          placeholder="Your Summary"
+          
+        >{{ result or '' }}</textarea>
+        
+        <div class="btn-group">
+          <button class="btn btn-copy" id="copyBtn">Copy Summary</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script defer>
+    document.addEventListener('DOMContentLoaded', function() {
+      const fileInput = document.getElementById('fileInput');
+      const fileNameSpan = document.getElementById('fileName');
+      const dataTextarea = document.getElementById('data');
+      const summarizeForm = document.getElementById('summarizeForm');
+      const resultTextarea = document.getElementById('result');
+      const copyBtn = document.getElementById('copyBtn');
+      const clearButton = document.getElementById('clearButton');
+
+      // File input handler
+      fileInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        fileNameSpan.textContent = file ? file.name : 'No file chosen';
+        if (file) {
+          dataTextarea.value = ''; // Clear text input when a file is selected
+        }
+      });
+
+      // Copy summary to clipboard
+      copyBtn.addEventListener('click', function() {
+        const summary = resultTextarea.value.trim();
+        if (!summary) {
+          alert('No summary to copy.');
+          return;
+        }
+        navigator.clipboard.writeText(summary)
+          .then(() => alert('Summary copied to clipboard!'))
+          .catch(err => console.error('Failed to copy:', err));
+      });
+
+      // Form submission validation
+      summarizeForm.addEventListener('submit', function(event) {
+        const input = dataTextarea.value;
+        const htmlTagRegex = /<[^>]*>/g;
+        if (!input.trim() && fileInput.files.length === 0) {
+          event.preventDefault();
+          alert('Please enter text or upload a file to summarize.');
+          return;
+        }
+        if (htmlTagRegex.test(input)) {
+          event.preventDefault();
+          alert('Please provide valid data without HTML tags.');
+        }
+      });
+
+      // Clear button functionality for text data and file input
+      clearButton.addEventListener('click', function() {
+        dataTextarea.value = '';    // Clear the text area
+        fileInput.value = '';         // Clear file input
+        fileNameSpan.textContent = 'No file chosen';
+      });
+    });
+  </script>
+</body>
+</html>
