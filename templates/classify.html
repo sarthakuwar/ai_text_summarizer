@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Classification</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #004A56 0%, #007B8A 100%);
+      color: white;
+      padding: 15px 0;
+      text-align: center;
+      margin-bottom: 20px;
+      border-radius: 0 0 15px 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+    .nav a {
+      color: white;
+      text-decoration: none;
+      padding: 10px 25px;
+      border-radius: 30px;
+      background-color: rgba(255,255,255,0.1);
+      transition: all 0.3s ease;
+    }
+    .nav a:hover {
+      background-color: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+    .content {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .input-section, .output-section {
+      flex: 1;
+      min-width: 300px;
+      background-color: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .section-title {
+      color: #004A56;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+    .textarea-input {
+      width: 100%;
+      min-height: 200px;
+      resize: vertical;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      margin: 5px;
+      font-size: 1rem;
+    }
+    .btn-submit {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: white;
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+    }
+    .btn-clear {
+      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+      color: white;
+    }
+    .btn-clear:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+    }
+    .file-input {
+      display: none;
+    }
+    .file-label {
+      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+      color: white;
+      padding: 12px 25px;
+      border-radius: 30px;
+      cursor: pointer;
+      margin: 5px;
+      transition: all 0.3s ease;
+      display: inline-block;
+      font-weight: bold;
+    }
+    .file-label:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+    }
+    .file-name {
+      margin-left: 10px;
+      color: #555;
+      font-size: 0.9rem;
+    }
+    .result-card {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .result-card h3 {
+      color: #004A56;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+    }
+    .result-value {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin: 5px 0;
+    }
+    .human {
+      color: #10B981;
+    }
+    .ai {
+      color: #EF4444;
+    }
+    .plot-container {
+      margin-top: 30px;
+      text-align: center;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .plot-container img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    .error {
+      color: #EF4444;
+      background-color: #FEE2E2;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .average-result {
+      background: linear-gradient(135deg, #004A56 0%, #007B8A 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .average-result h3 {
+      color: white;
+      margin-bottom: 10px;
+    }
+    .average-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    @media (max-width: 768px) {
+      .content {
+        flex-direction: column;
+      }
+      .input-section, .output-section {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>AI Text Classification</h1>
+    <div class="nav">
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('classify_page') }}">Text Classification</a>
+      <a href="{{ url_for('summarize') }}">Text Summarization</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="content">
+      <div class="input-section">
+        <h2 class="section-title">Input Text</h2>
+        {% if error %}
+          <div class="error">{{ error }}</div>
+        {% endif %}
+        
+        <form method="post" enctype="multipart/form-data">
+          <textarea 
+            class="textarea-input" 
+            name="text" 
+            id="text" 
+            placeholder="Enter text to classify or upload a file..."
+          >{% if text %}{{ text }}{% endif %}</textarea>
+          
+          <div class="btn-group">
+            <input 
+              type="file" 
+              name="file" 
+              id="fileInput" 
+              class="file-input" 
+              accept=".txt,.pdf,.docx,.doc"
+            >
+            <label for="fileInput" class="file-label">
+              📁 Upload File
+            </label>
+            <span id="fileName" class="file-name">No file chosen</span>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-submit" type="submit">🔍 Analyze Text</button>
+            <button class="btn btn-clear" type="button" id="clearButton">🗑️ Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="output-section">
+        <h2 class="section-title">Analysis Results</h2>
+        {% if result %}
+          <div class="average-result">
+            <h3>Average AI Probability</h3>
+            <p class="average-value">{{ result.average }}</p>
+          </div>
+          
+          <div class="result-card">
+            <h3>MultinomialNB Model</h3>
+            <p>Prediction: 
+              <span class="result-value {% if result.MultinomialNB.prediction == 'human' %}human{% else %}ai{% endif %}">
+                {{ result.MultinomialNB.prediction | upper }}
+              </span>
+            </p>
+            <p>AI Probability: <span class="result-value">{{ result.MultinomialNB.probability }}</span></p>
+          </div>
+          
+          <div class="result-card">
+            <h3>ComplementNB Model</h3>
+            <p>Prediction: 
+              <span class="result-value {% if result.ComplementNB.prediction == 'human' %}human{% else %}ai{% endif %}">
+                {{ result.ComplementNB.prediction | upper }}
+              </span>
+            </p>
+            <p>AI Probability: <span class="result-value">{{ result.ComplementNB.probability }}</span></p>
+          </div>
+          
+          <div class="result-card">
+            <h3>SVC Model</h3>
+            <p>Prediction: 
+              <span class="result-value {% if result.SVC.prediction == 'human' %}human{% else %}ai{% endif %}">
+                {{ result.SVC.prediction | upper }}
+              </span>
+            </p>
+            <p>AI Probability: <span class="result-value">{{ result.SVC.probability }}</span></p>
+          </div>
+          
+          {% if plot_url %}
+            <div class="plot-container">
+              <h3>AI Detection Probability</h3>
+              <img src="data:image/png;base64,{{ plot_url }}" alt="AI Probability Chart">
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="result-card">
+            <p>Submit text to see classification results. Our system will analyze your text using three different machine learning models to detect AI-generated content.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const fileInput = document.getElementById('fileInput');
+      const fileNameSpan = document.getElementById('fileName');
+      const textarea = document.getElementById('text');
+      const clearButton = document.getElementById('clearButton');
+
+      // File input handler
+      fileInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        fileNameSpan.textContent = file ? file.name : 'No file chosen';
+        if (file) {
+          textarea.value = ''; // Clear text input when a file is selected
+        }
+      });
+
+      // Clear button functionality
+      clearButton.addEventListener('click', function() {
+        textarea.value = '';
+        fileInput.value = '';
+        fileNameSpan.textContent = 'No file chosen';
+      });
+    });
+  </script>
+</body>
+</html>
