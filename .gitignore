@@ -12,5 +12,10 @@ build/
 *.egg-info/
 
 __pycache__/
+*.log
+*.db
 *.pyc
 data/
+.vercel
+ .env
+ settings.py

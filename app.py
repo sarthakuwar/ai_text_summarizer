@@ -13,6 +13,7 @@ import io
 import base64
 
 app = Flask(__name__)
+app.config.from_pyfile('settings.py')   
 
 # Model loading
 model_dir = "models"
@@ -136,8 +137,8 @@ def classify_page():
 @app.route("/summarize", methods=["GET", "POST"])
 def summarize():
     if req.method == "POST":
-        # API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
-        # headers = {"Authorization": "Bearer {api_key}"}
+        API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+        headers = {"Authorization": "Bearer " + app.config["API_KEY"]}
 
         if "file" in req.files:
             file = req.files["file"]
@@ -185,4 +186,4 @@ def summarize():
         return render_template("summarize.html")
 
 if __name__ == "__main__":
-    app.run(port=8000, debug=True)
+    app.run()
