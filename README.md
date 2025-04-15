@@ -1,111 +1,163 @@
 # 📝 AI Text Summarizer & Detector
 
-A simple Flask application that summarizes text using Facebook’s BART-Large-CNN model and detects whether the text is AI-generated or human-written using SVC, MultinomialNB, and ComplementNB models. This project demonstrates how to integrate NLP models from Hugging Face with Flask for text summarization and AI detection.
+A Flask-based application that summarizes text using Facebook’s **BART-Large-CNN** model and detects whether text is **AI-generated** or **human-written** using an ensemble of machine learning models. Now deployable via **Docker on AWS ECS** with a RESTful API.
 
-!
+---
 
-## Table of Contents
+## 📚 Table of Contents
+
 1. [Overview](#overview)  
 2. [Features](#features)  
-3. [Installation](#installation)  
-4. [Usage](#usage)  
-5. [Model Reference](#model-reference)  
-6. [Project Structure](#project-structure)  
-
+3. [Installation (Local)](#installation-local)  
+4. [Docker & AWS Deployment](#docker--aws-deployment)  
+5. [API Usage](#api-usage)  
+6. [Model Reference](#model-reference)  
+7. [Project Structure](#project-structure)  
 
 ---
 
 ## 🌟 Overview
+
 This application offers two main functionalities:
 
-Text Summarization: Uses BART-Large-CNN to generate concise summaries of large text blocks or uploaded files.
+- ✂️ **Text Summarization**: Uses Facebook's BART-Large-CNN to generate concise summaries of long texts or uploaded documents.
+- 🧠 **AI Text Detection**: Classifies text as AI-generated or human-written using SVC, MultinomialNB, and ComplementNB models.
 
-AI Text Detection: Classifies text as AI-generated or human-written using a combination of SVC, MultinomialNB, and ComplementNB models.
-
-Users can:
-
-Directly enter text or upload files (.txt, .docx, .pdf) for summarization.
-
-Detect AI-generated text and view the prediction confidence from all three models.
-
-Copy the summarized/detected text with one click.
-
-Edit the summary before copying or saving
+Users can interact via a **web interface** or directly call the **REST API** (ideal for automation or integration into other platforms).
 
 ---
 
 ## ✅ Features
-- **🔥 Text Summarization:** Uses [BART-Large-CNN](https://huggingface.co/facebook/bart-large-cnn) to generate concise summaries.
-- **File Upload:** Upload `.txt`, `.docx`, `.pdf`, or `.doc` files for summarization.
-- **Editable Summary:** Allows users to edit the summarized text directly in the output field.
-- **Copy to Clipboard:** Quickly copy the summarized text with one click.
-- **Clear Input:** Reset both the input text area and file input field.
-- **🤖 AI Text Detection:** Detects whether the given text is AI-generated or human-written
+
+- 🔥 **Text Summarization** using [BART-Large-CNN](https://huggingface.co/facebook/bart-large-cnn)
+- 📁 File Uploads: Supports `.txt`, `.docx`, `.pdf`
+- ✏️ Editable Output: Modify the generated summary before copying/saving
+- 📋 Copy to Clipboard: Quickly copy results
+- 🚼 Clear Input Option
+- 🧠 **AI Text Detection** with ensemble classification
+- 🚀 **Dockerized & Deployed**: Now accessible via API hosted on AWS ECS
 
 ---
 
-## Installation
+## 🛠️ Installation (Local)
+
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/your-username/ai_text_summarizer.git
    cd ai_text_summarizer
+   ```
 
-## Usage
-1. **Create and activate a virtual environment:**
+2. **Create and activate a virtual environment:**
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
 
-2. **Install dependencies:**
+3. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
+   ```
 
+4. **Run the Flask app:**
+   ```bash
+   python app.py
+   ```
 
-## Model reference
- **📝 Text Summarization**:
- 
-  This application uses Facebook's BART-Large-CNN model from Hugging Face's Transformers library. BART is a sequence-to-sequence model trained with denoising as 
-  pretraining objective. The model is particularly effective for:
+---
 
-  Text summarization
+## 🐳 Docker & AWS Deployment
 
-  Text generation
+### Build the Docker image:
+```bash
+docker build -t ai-text-app .
+```
 
-  Text comprehension
+### Run the container locally:
+```bash
+docker run -p 8000:8000 ai-text-app
+```
 
-The model can handle input text up to 1024 tokens and generates fluent, coherent summaries while preserving key information.
+### Deploy to AWS ECS:
+- Push your Docker image to [Amazon ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html)
+- Configure ECS Fargate / EC2 with a task definition
+- Expose port `8000` and access your app via public IP or load balancer
 
-**🤖 AI Text Detection**:
+---
 
- -**Models**:
+## 📱 API Usage
 
-   SVC (Support Vector Classifier) → Effective for text classification.
+Once deployed (e.g., to http://3.27.65.213:8000), use the following endpoint to classify text:
 
-   (Multinomial Naive Bayes) → Good for document classification.
+### 🔍 Classify Text
 
-   ComplementNB (Complement Naive Bayes) → Effective for imbalanced datasets.
+```bash
+curl -X POST "http://3.27.65.213:8000/api/classify" -F "text=This is a test input"
+```
 
-  -**Ensemble Prediction** Displays confidence scores from all three models.
+#### ✅ Example Response:
 
-## Project structure
+```json
+{
+  "input_text": "This is a test input",
+  "results": {
+    "MultinomialNB": {
+      "prediction": "human",
+      "probability": "41.7%"
+    },
+    "ComplementNB": {
+      "prediction": "AI-generated",
+      "probability": "54.7%"
+    },
+    "SVC": {
+      "prediction": "AI-generated",
+      "probability": "100.0%"
+    },
+    "average_probability": "65.5%"
+  }
+}
+```
 
-```php
+> You can easily integrate this endpoint with your frontend or another service to classify user-submitted text dynamically.
+
+---
+
+## 🧐 Model Reference
+
+### ✂️ **Text Summarization**:
+- Model: [facebook/bart-large-cnn](https://huggingface.co/facebook/bart-large-cnn)
+- Capable of handling up to 1024 tokens
+- Pretrained on large news datasets for high-quality abstractive summarization
+
+### 🧠 **AI Text Detection**:
+- **SVC (Support Vector Classifier)** – robust text classifier
+- **MultinomialNB** – good baseline for document classification
+- **ComplementNB** – performs better with imbalanced datasets
+
+Ensemble predictions show each model’s decision with probabilities + overall average.
+
+---
+
+## 📁 Project Structure
+
+```
 ai_text_summarizer/
-├── app.py                # Main Flask application
+├── app.py                # Main Flask app
+├── Dockerfile            # Docker image definition
 ├── requirements.txt      # Python dependencies
-├── static/               # Static files (CSS, JS, images)
-│   └── screenshot.png    # Application screenshot
+├── static/               # CSS, JS, image files
+│   └── screenshot.png    
 ├── templates/            # HTML templates
-│   ├── summarizer.html   # Summarization interface
-│   ├── classify.html     # AI text detection interface
-│   └── index.html         # Base template with navigation
-├── models/               # AI detection models
-│   ├── svc_model.pkl     # SVC model
-│   ├── mnb_model.pkl     # MultinomialNB model
-│   └── cnb_model.pkl     # ComplementNB model
+│   ├── index.html        
+│   ├── summarizer.html   
+│   └── classify.html     
+├── models/               # Pretrained AI detection models
+│   ├── svc_model.pkl     
+│   ├── mnb_model.pkl     
+│   └── cnb_model.pkl     
 └── README.md             # Project documentation
+```
 
+---
 
-
-
+Let us know if you'd like a Postman collection or OpenAPI spec added for easy API testing! 👩‍💻
 
