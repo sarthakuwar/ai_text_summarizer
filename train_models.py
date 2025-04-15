@@ -29,3 +29,4 @@ pickle.dump(pipeCNB, open(f"{model_dir}/cnb_model.pkl", "wb"))
 pickle.dump(pipeSVC, open(f"{model_dir}/svc_model.pkl", "wb"))
 
 print("✅ Models trained and saved successfully!")
+

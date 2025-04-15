@@ -17,5 +17,5 @@ __pycache__/
 *.pyc
 data/
 .vercel
- .env
+.env
  settings.py
